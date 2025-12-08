@@ -6,10 +6,10 @@ async function bootstrap() {
   
   // Enable CORS for frontend
   app.enableCors({
-    origin: ['http://localhost:3001', 'http://localhost:3000', "http://localhost:5173"],
+    origin: ['http://localhost:3001', 'http://localhost:3000', "http://localhost:5173", "https://pizza-wale-shop-owner.vercel.app/"],
     credentials: true,
   });
   
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000,'0.0.0.0');
 }
 void bootstrap();
