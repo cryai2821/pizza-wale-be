@@ -1,0 +1,180 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  SHOP_OWNER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+model Shop {
+  id          String   @id @default(uuid())
+  name        String
+  username    String   @unique
+  password    String   // Hashed
+  isOpen      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  categories  Category[]
+  products    Product[]
+  orders      Order[]
+}
+
+model User {
+  id          String   @id @default(uuid())
+  phone       String   @unique
+  name        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  orders      Order[]
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  sortOrder   Int      @default(0)
+  
+  // Relations
+  products    Product[]
+  optionGroups OptionGroup[] // Global option groups for this category
+}
+
+model OptionGroup {
+  id          String   @id @default(uuid())
+  name        String   // e.g., "Size", "Toppings"
+  minSelect   Int      @default(0)
+  maxSelect   Int      @default(1) // 1 for single choice, >1 for multiple
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  
+  // Relations
+  options     Option[]
+  productConfig ProductOptionConfig[]
+}
+
+model Option {
+  id            String   @id @default(uuid())
+  name          String   // e.g., "Small", "Cheese"
+  price         Decimal  @default(0)
+  optionGroupId String
+  optionGroup   OptionGroup @relation(fields: [optionGroupId], references: [id])
+  
+  // Relations
+  orderItems    OrderItemOption[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  basePrice   Decimal
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  imageUrl    String?
+  isAvailable Boolean  @default(true)
+  
+  // Relations
+  optionConfigs ProductOptionConfig[]
+  orderItems    OrderItem[]
+}
+
+// Join table to enable/disable/override OptionGroups for a Product
+model ProductOptionConfig {
+  id            String      @id @default(uuid())
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  optionGroupId String
+  optionGroup   OptionGroup @relation(fields: [optionGroupId], references: [id])
+  
+  isEnabled     Boolean     @default(true)
+  // Future: overrideMin, overrideMax
+  
+  @@unique([productId, optionGroupId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  shortId         String      @unique // User-friendly ID (e.g., #1234)
+  shopId          String
+  shop            Shop        @relation(fields: [shopId], references: [id])
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  guestPhone      String?     // If guest checkout
+  
+  status          OrderStatus @default(PENDING)
+  totalAmount     Decimal
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  items           OrderItem[]
+  events          OrderEvent[]
+  
+  @@index([shopId, status])
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  quantity    Int
+  price       Decimal  // Snapshot of price at time of order
+  
+  // Relations
+  selectedOptions OrderItemOption[]
+}
+
+model OrderItemOption {
+  id          String    @id @default(uuid())
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  optionId    String
+  option      Option    @relation(fields: [optionId], references: [id])
+  
+  price       Decimal   // Snapshot of price
+}
+
+model OrderEvent {
+  id          String      @id @default(uuid())
+  orderId     String
+  order       Order       @relation(fields: [orderId], references: [id])
+  status      OrderStatus
+  timestamp   DateTime    @default(now())
+  metadata    Json?
+}
+
+model IdempotencyKey {
+  key         String   @id
+  response    Json
+  createdAt   DateTime @default(now())
+}

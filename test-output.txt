@@ -1,0 +1,103 @@
+
+> api@0.0.1 test:e2e
+> jest --config ./test/jest-e2e.json test/verification.e2e-spec.ts
+
+  console.log
+    Starting Verification Test Setup...
+
+      at Object.<anonymous> (verification.e2e-spec.ts:17:15)
+
+  console.log
+    ✅ Firebase initialized with environment variables
+
+      at FirestoreService.onModuleInit (../src/firestore/firestore.service.ts:30:17)
+          at Function.from (<anonymous>)
+
+  console.log
+    Fetching Admin Shop...
+
+      at Object.<anonymous> (verification.e2e-spec.ts:27:15)
+
+  console.log
+    Shop found: 630f4828-f130-4e8d-9038-c9e3361d43fc
+
+      at Object.<anonymous> (verification.e2e-spec.ts:34:15)
+
+  console.log
+    Test 1: Fetch Menu
+
+      at Object.<anonymous> (verification.e2e-spec.ts:46:13)
+
+  console.log
+    Veg Loaded ID: ec249961-6e68-4dd8-a49a-e41ef927dc67
+
+      at Object.<anonymous> (verification.e2e-spec.ts:63:13)
+
+  console.log
+    Test 2: Auth User
+
+      at Object.<anonymous> (verification.e2e-spec.ts:67:13)
+
+  console.log
+    [MOCK OTP] Sending 942628 to +919999999999
+
+      at MockOtpProvider.sendOtp (../src/auth/otp.service.ts:12:13)
+
+  console.log
+    Test 3: Create Order
+
+      at Object.<anonymous> (verification.e2e-spec.ts:85:13)
+
+FAIL test/verification.e2e-spec.ts (5.67 s)
+  Full System Verification (E2E)
+    √ 1. Should fetch menu and find "Veg Loaded" (1519 ms)
+    × 2. Should authenticate user (Guest/OTP) (40 ms)
+    × 3. Should create an order with complex options (860 ms)
+
+  ● Full System Verification (E2E) › 2. Should authenticate user (Guest/OTP)
+
+    expected 201 "Created", got 400 "Bad Request"
+
+    [0m [90m 75 |[39m       [33m.[39mpost([32m'/auth/otp/verify'[39m)
+     [90m 76 |[39m       [33m.[39msend({ phone[33m:[39m [32m'+919999999999'[39m[33m,[39m otp[33m:[39m [32m'123456'[39m })
+    [31m[1m>[22m[39m[90m 77 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m    |[39m        [31m[1m^[22m[39m
+     [90m 78 |[39m
+     [90m 79 |[39m     userToken [33m=[39m res[33m.[39mbody[33m.[39maccess_token[33m;[39m
+     [90m 80 |[39m     expect(userToken)[33m.[39mtoBeDefined()[33m;[39m[0m
+
+      at Object.<anonymous> (verification.e2e-spec.ts:77:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:152:11)
+
+  ● Full System Verification (E2E) › 3. Should create an order with complex options
+
+    expected 201 "Created", got 401 "Unauthorized"
+
+    [0m [90m 123 |[39m       [33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer ${userToken}`[39m)
+     [90m 124 |[39m       [33m.[39msend(payload)
+    [31m[1m>[22m[39m[90m 125 |[39m       [33m.[39mexpect([35m201[39m)[33m;[39m
+     [90m     |[39m        [31m[1m^[22m[39m
+     [90m 126 |[39m
+     [90m 127 |[39m     [36mconst[39m order [33m=[39m res[33m.[39mbody[33m;[39m
+     [90m 128 |[39m     expect(order[33m.[39mshortId)[33m.[39mtoBeDefined()[33m;[39m[0m
+
+      at Object.<anonymous> (verification.e2e-spec.ts:125:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:152:11)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 1 passed, 3 total
+Snapshots:   0 total
+Time:        6.15 s
+Ran all test suites matching test/verification.e2e-spec.ts.
