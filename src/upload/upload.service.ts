@@ -27,6 +27,7 @@ export class UploadService {
       Bucket: this.bucketName,
       Key: key,
       ContentType: contentType,
+      // ACL: 'public-read', // We will rely on Bucket Policy instead to avoid header complexity on frontend
     });
 
     const uploadUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 300 }); // 5 minutes
