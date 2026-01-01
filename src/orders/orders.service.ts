@@ -151,9 +151,19 @@ export class OrdersService {
     const order = await this.prisma.order.update({
       where: { id: orderId },
       data: { status },
+      include: { items: true },
     });
 
-    await this.firestore.updateOrder(order.id, { status });
+    await this.firestore.updateOrder(order.id, { 
+      status, 
+      shopId: order.shopId, 
+      userId: order.userId,
+      shortId: order.shortId,
+      totalAmount: Number(order.totalAmount),
+      guestPhone: order.guestPhone,
+      items: order.items.map(i => ({ productId: i.productId, quantity: i.quantity })),
+      updatedAt: new Date(),
+    });
     return order;
   }
 
